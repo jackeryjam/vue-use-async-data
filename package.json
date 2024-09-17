@@ -4,7 +4,8 @@
   "description": "vue的异步数据处理工具",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "publish:npm": "npm publish --registry=https://registry.npmjs.org/"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
