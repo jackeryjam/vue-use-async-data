@@ -99,4 +99,4 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
   };
 };
 
-export default useServerData;
+export default useAsyncData;
