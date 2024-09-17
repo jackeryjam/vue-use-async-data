@@ -1,6 +1,6 @@
 {
   "name": "vue-use-async-data",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "vue的异步数据处理工具",
   "main": "dist/index.js",
   "scripts": {
