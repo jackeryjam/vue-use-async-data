@@ -1,0 +1,22 @@
+{
+  "name": "vue-use-async-data",
+  "version": "1.0.0",
+  "description": "vue的异步数据处理工具",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "release": "npx standard-version && npm run build && npm publish"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "詹前广",
+  "license": "MIT",
+  "dependencies": {}
+}
