@@ -1,5 +1,12 @@
 import { createPromise, deepClone } from "./utils";
-import { computed, getCurrentInstance, ref, watch, watchEffect } from "vue";
+import {
+  Ref,
+  computed,
+  getCurrentInstance,
+  ref,
+  watch,
+  watchEffect,
+} from "vue";
 
 /**
  * @param fetchFunc
@@ -13,22 +20,33 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
     enhancer2?: (data: V) => W;
     enhancer3?: (data: W) => Y;
     init?: INIT;
-    interval?: number;
+    editableCopy?: boolean;
+    lazy?: boolean;
   }
 ) => {
-  const { enhancer, init, enhancer2, enhancer3, interval } = options || {};
+  const {
+    enhancer,
+    init,
+    enhancer2,
+    enhancer3,
+    editableCopy = false,
+    lazy = true,
+  } = options || {};
   const getInitState = () => {
     if (typeof init === "object") return deepClone(init);
     return init;
   };
   const vueInstance = getCurrentInstance();
-  const dataRef = ref<T>(getInitState() as any);
+  const sourceData = ref<T>(getInitState() as any);
   const isLoading = ref(false);
   const hasInit = ref(false);
-  const startUseIt = ref(!!vueInstance); // 如果是在组件里面默认开始就请求，否则是有使用才进行请求
+  const startUseIt = ref(!!vueInstance || !lazy); // 如果是在组件里面默认开始就请求，否则是有使用才进行请求
+
+  const editableData: Ref<Y> = ref();
+
   const computedData = computed<Y>(() => {
     startUseIt.value = true;
-    let data = dataRef.value;
+    let data = sourceData.value;
     if (enhancer) {
       // @ts-ignore
       data = enhancer(data);
@@ -41,6 +59,11 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
       // @ts-ignore
       data = enhancer3(data);
     }
+
+    if (editableCopy) {
+      editableData.value = deepClone(data);
+    }
+
     // @ts-ignore
     return data as Y;
   });
@@ -57,17 +80,15 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
         hasInit.value = true;
       }
       // @ts-ignore
-      dataRef.value = data;
+      sourceData.value = data;
     } finally {
       isLoading.value = false;
     }
   };
   watchEffect(() => fetchData());
   const resetData = () => {
-    dataRef.value = init as any;
+    sourceData.value = init as any;
   };
-  if (interval) {
-  }
 
   const isFirstLoading = computed(() => !hasInit.value && isLoading.value);
 
@@ -89,6 +110,7 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
 
   return {
     data: computedData,
+    editableData,
     refresh: fetchData,
     isLoading: computed(() => isLoading.value), // 让loading状态变成只读
     resetData,
