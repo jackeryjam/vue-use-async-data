@@ -1,6 +1,6 @@
 {
   "name": "vue-use-async-data",
-  "version": "0.0.1-0",
+  "version": "1.0.0",
   "description": "vue的异步数据处理工具",
   "main": "dist/index.js",
   "scripts": {
@@ -22,5 +22,9 @@
     "dist"
   ],
   "author": "詹前广",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jackeryjam/vue-use-async-data"
+  },
   "license": "MIT"
 }
