@@ -42,7 +42,7 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
   const hasInit = ref(false);
   const startUseIt = ref(!!vueInstance || !lazy); // 如果是在组件里面默认开始就请求，否则是有使用才进行请求
 
-  const editableData: Ref<Y> = ref();
+  const editableData: Ref<Y> = ref(deepClone(getInitState() as any));
 
   const computedData = computed<Y>(() => {
     startUseIt.value = true;
@@ -60,13 +60,14 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
       data = enhancer3(data);
     }
 
-    if (editableCopy) {
-      editableData.value = deepClone(data);
-    }
-
     // @ts-ignore
     return data as Y;
   });
+  if (editableCopy) {
+    watch(computedData, (val) => {
+      editableData.value = deepClone(val);
+    });
+  }
   let curRequestTime = 0;
   const fetchData = async () => {
     if (!startUseIt.value) return;
@@ -79,8 +80,10 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
       if (!!data && !hasInit.value) {
         hasInit.value = true;
       }
-      // @ts-ignore
-      sourceData.value = data;
+      if (data !== undefined) {
+        // @ts-ignore
+        sourceData.value = data;
+      }
     } finally {
       isLoading.value = false;
     }
@@ -89,8 +92,6 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
   const resetData = () => {
     sourceData.value = init as any;
   };
-
-  const isFirstLoading = computed(() => !hasInit.value && isLoading.value);
 
   let loadingPromise: ReturnType<typeof createPromise<void>> = createPromise();
   watch(isLoading, (isLoadingVal) => {
@@ -108,17 +109,41 @@ export const useAsyncData = <T, V = T, W = V, Y = W, INIT = T>(
     return computedData.value;
   };
 
+  const computedHasInit = computed<boolean>(() => {
+    startUseIt.value = true;
+    return hasInit.value;
+  });
+
+  const computedEditableData = computed<Y>({
+    get: () => {
+      startUseIt.value = true;
+      return editableData.value;
+    },
+    set: (val) => {
+      editableData.value = val;
+    },
+  });
+
+  const computedIsLoading = computed<boolean>(() => {
+    startUseIt.value = true;
+    return isLoading.value;
+  });
+
+  const isFirstLoading = computed<boolean>(() => {
+    startUseIt.value = true;
+    return !hasInit.value && isLoading.value;
+  });
+
   return {
     data: computedData,
-    editableData,
+    editableData: computedEditableData,
+    hasInit: computedHasInit,
+    isLoading: computedIsLoading, // 让loading状态变成只读
+    isFirstLoading,
     refresh: fetchData,
-    isLoading: computed(() => isLoading.value), // 让loading状态变成只读
     resetData,
     getInitState,
-    hasInit,
-    isFirstLoading,
     getRealTimeData,
   };
 };
-
 export default useAsyncData;
