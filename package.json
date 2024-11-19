@@ -1,11 +1,12 @@
 {
   "name": "vue-use-async-data",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "vue的异步数据处理工具",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "publish:npm": "npm publish --registry=https://registry.npmjs.org/",
+    "login:npm": "npm login --registry=https://registry.npmjs.org/",
     "test": "jest"
   },
   "peerDependencies": {
